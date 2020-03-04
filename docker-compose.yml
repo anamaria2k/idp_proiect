@@ -1,0 +1,12 @@
+# Use root/example as user/password credentials
+version: '3.3'
+
+services:
+  userclient:
+    image: anamaria2k/idp_proiect:userclient
+    build: ./userclient
+    restart: always
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./userclient/src:/src
