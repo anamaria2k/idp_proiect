@@ -1,10 +1,9 @@
-# Use root/example as user/password credentials
 version: '3.3'
 
 services:
 
   db:
-    image: mysql:5.7
+    image: mysql
     restart: always
     environment:
       MYSQL_USER: user
@@ -17,7 +16,7 @@ services:
       - ./database:/docker-entrypoint-initdb.d/
 
   userserver:
-    build: ./userserver
+    image: anamaria2k/idp_proiect:userserver
     restart: always
     depends_on:
        - db
@@ -27,9 +26,9 @@ services:
       - ./userserver/src:/src
 
   userclient:
-    build: ./userclient
+    image: anamaria2k/idp_proiect:userclient
     restart: always
-    links:
+    depends_on:
        - userserver
     ports:
       - '4000:4000'
@@ -41,9 +40,3 @@ services:
     restart: always
     ports:
       - '8080:8080'
-
-  
-# Names our volume
-volumes:
-  my-db:
-      
