@@ -1,6 +1,8 @@
 import requests
 from flask import Flask
 from flask import render_template, request, Response, make_response, redirect
+import ast
+
 
 app = Flask(__name__)
 
@@ -23,12 +25,8 @@ def products_page():
 
 	det = requests.post("http://userserver:5000/products", json=payload).json()
 	products = det['products']
-	cookie_string = det['cookie']
 
-	ret = make_response(render_template("products.html", id_prod=int(id_prod), user_name=full_name, categories=categories, products=products))
-	if 'sessionid' not in request.cookies:
-		ret.set_cookie('sessionid', cookie_string)
-	return ret
+	return render_template("products.html", id_prod=int(id_prod), user_name=full_name, categories=categories, products=products)
 
 
 @app.route("/register", methods=["GET"])
@@ -81,12 +79,9 @@ def login_page_post():
 
 	message = resp['message']
 	full_name = resp['full_name']
-	user_id = resp['user_id']
 
 	if resp['message'] == "":
-		ret = make_response(render_template("loginOK.html", user_name=full_name, categories=categories))
-		ret.set_cookie('userid', user_id)
-		return ret
+		return render_template("loginOK.html", user_name=full_name, categories=categories)
 	else:
 		return render_template("login.html", message=message, categories=categories)
 
@@ -96,13 +91,12 @@ def login_page_post():
 def logout_page():
 	r = requests.get("http://userserver:5000/get_name_categ").json()
 	categories = r['categories']
-	
-	res = make_response(render_template("home.html", categories=categories))
-	res.set_cookie('sessionid', '', expires=0)
-	res.set_cookie('userid', '', expires=0)
-	return res
 
-@app.route("/endCart", methods=["GET","POST"])
+	ret = requests.get("http://userserver:5000/logout").json()
+	
+	return render_template("home.html", categories=categories)
+
+@app.route("/cart", methods=["GET","POST"])
 def cart_page_get():
 
 	r = requests.get("http://userserver:5000/get_name_categ").json()
@@ -116,19 +110,45 @@ def cart_page_get():
 		payload['item_id'] = item_id
 
 	resp = requests.post("http://userserver:5000/cart", json=payload).json()
-	'''cart_details = resp['cart_details']
-	total_price = resp['total_price']'''
+	
+	cart_details = resp['cart_details']
+	total_price = float(resp['total_price'])
 
-	return render_template("cart.html", user_name=full_name, categories=categories, total_price=0)
+	return render_template("cart.html", user_name=full_name, categories=categories, cart_details=cart_details, total_price=total_price)
 
-@app.route("/cart", methods=["POST"])
+@app.route("/currentCart", methods=["GET","POST"])
 def add_products():
-	return render_template("cart.html")
+	r = requests.get("http://userserver:5000/get_name_categ").json()
+	full_name = r['full_name']
+	categories = r['categories']
 
-@app.route("/endCart", methods=["POST"])
+	payload = {'product_id': "", 'pieces': "", 'item_id': ""}
+
+	item_id = request.args.get('item_id')
+	if item_id:
+		payload['item_id'] = item_id
+
+	product_id = request.form['id']
+	pieces = request.form['pieces']
+
+	payload['product_id'] = product_id
+	payload['pieces'] = pieces
+
+	resp = requests.post("http://userserver:5000/currentCart", json=payload).json()
+
+	cart_details = resp['cart_details']
+	total_price = float(resp['total_price'])
+	return render_template("cart.html", user_name=full_name, categories=categories, cart_details=cart_details, total_price=total_price)
+
+@app.route("/endCart", methods=["GET","POST"])
 def cart_finish():
-	return render_template("endCart.html")
+	r = requests.get("http://userserver:5000/get_name_categ").json()
+	full_name = r['full_name']
+	categories = r['categories']
 
+	ret = requests.get("http://userserver:5000/endCart").json()
+
+	return render_template("endCart.html", user_name=full_name, categories=categories)
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0',port='4000',debug=True)

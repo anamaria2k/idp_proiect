@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+
+<div class="topnav">
+  <a href="/categories">Categories</a>
+  <a href="/products">Products</a>
+  <a class="active" href="/orders">Orders</a>
+
+</div>
+
+<table id="orders">
+  <tr>
+    <th>Order number</th>
+    <th>Name</th>
+    <th>Address</th>
+    <th>Contact</th>
+    <th>Order value</th>
+	  <th>Order date</th>
+  </tr>
+
+
+  {% for first, last, email, addr, mobile, orderId, total, orderdate in orders %}
+    <tr>
+      <td>Order no. {{orderId}}</td>
+      <td>{{first}} {{last}}</td>
+      <td>{{addr}}</td>
+      <td>E-mail: {{email}}
+        <br>Phone: {{mobile}}
+      </td>
+      <td>{{total}}</td>
+      <td>{{orderdate}}</td>
+    </tr>
+  {% endfor %}
+  
+</table>

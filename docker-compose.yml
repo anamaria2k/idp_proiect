@@ -1,3 +1,4 @@
+# Use root/example as user/password credentials
 version: '3.3'
 
 services:
@@ -16,23 +17,53 @@ services:
       - ./database:/docker-entrypoint-initdb.d/
 
   userserver:
-    image: anamaria2k/idp_proiect:userserver
+    build: ./userserver
     restart: always
     depends_on:
        - db
     ports:
       - '5000:5000'
+    volumes:
+      - ./userserver/src:/src
 
   userclient:
-    image: anamaria2k/idp_proiect:userclient
+    build: ./userclient
     restart: always
-    depends_on:
+    links:
        - userserver
     ports:
       - '4000:4000'
+    volumes:
+      - ./userclient/src:/src
+
+  adminserver:
+    build: ./adminserver
+    restart: always
+    depends_on:
+       - db
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./adminserver/src:/src
+
+  adminclient:
+    build: ./adminclient
+    restart: always
+    links:
+       - adminserver
+    ports:
+      - '2000:2000'
+    volumes:
+      - ./adminclient/src:/src
 
   adminer:
     image: adminer
     restart: always
     ports:
       - '8080:8080'
+
+  
+# Names our volume
+volumes:
+  my-db:
+      

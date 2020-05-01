@@ -14,55 +14,19 @@ mydb = mysql.connector.connect(user="user", password="password",
 										port="3306",
 										database="makeupShop")
 
-
-def add_categories():
-	try:
-		
-		mycursor = mydb.cursor()
-		mycursor.callproc('addCategory',[])
-		mydb.commit()
-		mycursor.close()
-
-
-	except mysql.connector.Error as err:
-		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-			return "Something is wrong with your user name or password"
-		elif err.errno == errorcode.ER_BAD_DB_ERROR:
-			return "Database does not exist"
-	
-	return "Succesfully inserted entry"
-
-def add_products():
-	try:
-		
-		mycursor = mydb.cursor()
-		mycursor.callproc('addProduct',[])
-		mydb.commit()
-		mycursor.close()
-
-
-	except mysql.connector.Error as err:
-		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-			return "Something is wrong with your user name or password"
-		elif err.errno == errorcode.ER_BAD_DB_ERROR:
-			return "Database does not exist"
-	
-	return "Succesfully inserted entry"
-
-
-
-
+login_user_id = 0
+cookie_session_id = 0
 
 def generate_cookie():
 	myTime = time.time()
 	return str(myTime)
 
 def verify_user_cookie():
-	name = tuple()
-	user_id = request.cookies.get('userid')
-	if 'userid' in request.cookies:
-		user_id = request.cookies['userid']
-		name = get_user_name(1)[0]
+	global login_user_id
+	name = ""
+	user_id = login_user_id
+	if user_id != 0:	
+		name = get_user_name(user_id)
 	return name
 
 
@@ -72,6 +36,7 @@ def get_full_name():
 	name = verify_user_cookie()
 
 	if name:
+		name = name[0]
 		full_name = name[0] + " " + name[1]
 	return full_name
 
@@ -315,18 +280,19 @@ def finish_order(user_id, session_id):
 @app.route("/get_name_categ", methods=["GET"])
 def home_page():
 	categories = get_categories()
-	payload = {'full_name': "", 'categories':categories}
-	full_name = verify_user_cookie()
-	if full_name != "":
-		payload['full_name'] = full_name
+	full_name = get_full_name()
+	payload = {'full_name': full_name, 'categories':categories}
 	return payload
 
 @app.route("/products", methods=["GET","POST"])
 def products_page():
+	global cookie_session_id
 	payload = request.get_json()
 	products = get_products(payload['id_prod'])
 	cookie_string = generate_cookie()
-	res = {'products':products,'cookie': cookie_string}
+	if cookie_session_id == 0:
+		cookie_session_id = cookie_string
+	res = {'products':products}
 
 
 	return res
@@ -355,38 +321,84 @@ def register_page_post():
 
 @app.route("/login", methods=["GET","POST"])
 def login_page_post():
-
+	global login_user_id
 	payload = request.get_json()
 	
 	ok = verify_account(str(payload['mail']), str(payload['psw']))
-	resp = {'message': "", 'user_id': "", 'full_name': ""}
+	resp = {'message': "", 'full_name': ""}
 	
 	if ok == 1:
 		user_id = get_user_id(payload['mail'])[0]
 		# generate user Cookie
 		full_name = get_full_name_by_id(user_id)
-		resp['user_id'] = str(user_id)
 		resp['full_name'] = full_name
+		login_user_id = user_id
 	elif ok == 0:
 		resp['message'] = "This account does not exist."
 
-
 	return resp
 
-@app.route("/cart", methods=["GET"])
-def cart_page_get():
-	payload = request.get_json()
-	res =  {'cart_details': "", 'total_price': ""}
-	'''if payload['item_id'] != "":
-		delete_item(payload['item_id'])'''
+@app.route("/logout", methods=["GET"])
+def logout_page():
+	global login_user_id
+	global cookie_session_id
+	login_user_id = 0
+	cookie_session_id = 0
+	resp = {'login_user_id': "0"}
+	
+	return resp
 
-	'''session_id = request.cookies.get('sessionid')
-	res['cart_details'] = get_cart_details(session_id)
-	res['total_price'] = get_total_price(session_id)'''
+@app.route("/cart", methods=["GET", "POST"])
+def cart_page_get():
+	global cookie_session_id
+	session_id = cookie_session_id
+	res =  {'cart_details': "", 'total_price': ""}
+
+	payload = request.get_json()
+	if payload['item_id'] != "":
+		delete_item(payload['item_id'])
+
+	cart_details = get_cart_details(session_id)
+	total_price = get_total_price(session_id)
+	res['cart_details'] = cart_details
+	res['total_price'] = str(total_price)
 
 	return res
 	
+@app.route("/currentCart", methods=["GET","POST"])
+def add_products():
+	global cookie_session_id
+	session_id = cookie_session_id
 
+	resp = {'cart_details': "", 'total_price': ""}
+
+	payload = request.get_json()
+	if payload['item_id'] != "":
+		delete_item(payload['item_id'])
+
+	product_id = payload['product_id']
+	pieces = payload['pieces']
+	add_to_cart(product_id, pieces, session_id)
+
+	cart_details = get_cart_details(session_id)
+	total_price = get_total_price(session_id)
+
+
+	resp['cart_details'] = cart_details
+	resp['total_price'] = str(total_price)
+
+	return resp
+
+@app.route("/endCart", methods=["GET","POST"])
+def cart_finish():
+	global login_user_id
+	global cookie_session_id
+	resp = {'cookie_session_id': "0"}
+	
+	finish_order(login_user_id, cookie_session_id)
+	cookie_session_id = 0
+	
+	return resp
 
 
 

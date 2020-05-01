@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<div class="topnav">
+  <a class="active" href="categories">Categories</a>
+  <a href="/products">Products</a>
+  <a  href="/orders">Orders</a>
+
+</div>
+
+<div class="container-form">
+
+  <form method=post action="categories">
+  <input type="hidden" name="funct_id" value="{{categ_id}}">
+  <div class="row">
+    <div class="col-25">
+      <label for="nume">Category
+      {% if categ_id != "" %}
+      update
+      {% else %}
+      insert
+      {% endif %}
+      </label>
+    </div>
+    <div class="col-75">
+      <input type="text" id="categ_name" name="categ_name" placeholder="Category name" value="{{categ_name}}">
+    </div>
+  </div>
+
+  <div class="row">
+      
+    <div class="col-100">
+      <br>
+        <input type="submit" value="Save changes">
+      </br>
+    </div>
+	
+    
+  </div>
+  </form>
+  
+</div> 
+  
+  
+  
+  
+<table id="products">
+  <tr>
+    <th>Category</th>
+    <th>Edit</th>
+    <th>Delete</th>
+  </tr>
+  <tr>
+    {% for id, categ_name in categories %}
+    <tr>
+      <td>{{categ_name}}</td>
+        <td><a href="categories?update_id={{id}}">Edit</a></td>
+      <td><a href="categories?delete_id={{id}}"  onclick="return window.confirm('Do you really want to delete this category?');">Delete</a></td>
+    </tr>
+    {% endfor %}
+  </tr>
+</table>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
