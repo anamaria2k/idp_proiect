@@ -1,0 +1,68 @@
+{% extends "header.html" %}
+{% block content %}
+
+
+  <div class="main">
+		<div class="content">
+		  <h1>Shopping cart</h1>
+		  <center>
+
+		  	{% if total_price > 0 %}
+
+				  	<table style="width:75%">
+					  <tr>
+							<th style="width:35%">Product</th>
+							<th style="width:35%">Brand</th>
+							<th>Photo</th>
+							<th>Price per product</th>
+							<th>Quantity</th>
+							<th>Total price</th>
+							<th>Delete</th>
+					  </tr>
+					  {% for item_id, product_id, name, brand, picture, price, noPieces, session_id, order_id in cart_details %}
+						  <tr>
+								<td>{{name}}</td>
+								<td>{{brand}}</td>
+								<td><img src={{picture}} style="width:100%"></td>
+								<td>${{price}}</td>
+								<td>{{noPieces}}</td>
+								<td>${{noPieces * price}}</td>
+								<td><a href="/cart?item_id={{item_id}}"><i class="fa fa-remove"></i></a></td>
+							<!--<td><i class="fa fa-check"></i></td>-->
+						  </tr>
+						{% endfor %}
+						<tr>
+							<td colspan=5></td><td colspan=2>
+								<b>Total price: ${{total_price}}</b>
+							</td>
+						</tr>
+
+
+					</table>
+					
+
+					{% if user_name %}
+							<form method="POST" action="/endCart">
+				    		<button type="submit" class="registerbtn" style="width:1250px">Send order</button>
+				    	</form>
+				    {% else %}
+		        		<div class="container signin">
+							<p>You have to be logged in to finish the purchase. <a href="/login">Sign in</a>.</p>
+					  	</div>
+		      		{% endif %}
+
+		    {% else %}
+					<div class="container signin">
+							<p>Your cart is empty.</p>
+					</div>
+			{% endif %}
+			
+			</center>
+		</div>
+		    
+  </div>
+</div>
+
+</body>
+
+{% endblock %}

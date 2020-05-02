@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+
+<div class="header">
+  <img src="/static/sigla.jpeg">
+</div>
+
+<div class="topnav">
+  <a href="/home"><i class="fa fa-fw fa-home"></i> Home</a>
+  <div class="login-container">
+ 
+      <a href="/cart"><i class="fa fa-fw fa-shopping-basket"></i></a>
+      
+
+      {% if user_name %}
+        <a href="/logout"> Logout</a>
+        <a href=""><i class="fa fa-fw fa-user"></i>{{user_name}}</a>
+      {% else %}
+        <a href="/register"><i class="fa fa-fw fa-address-card"></i>Register</a>
+        <a href="/login"><i class="fa fa-fw fa-user"></i> Login</a>
+      {% endif %}
+      
+  </div>
+</div>
+
+
+<div class="row">
+    <div class="side">
+
+  		<div class="sidebar">
+  		  {% for id, name in categories %}
+          {% if id == id_prod %}
+  				  <a class="active" href="/products?id_prod={{id}}">{{name}}</a>
+          {% else %}
+            <a href="/products?id_prod={{id}}">{{name}}</a>
+          {% endif %}
+  			{% endfor %}
+  		</div>
+
+
+    </div>
+
+
+{% block content %}{% endblock %}
+
