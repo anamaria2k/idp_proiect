@@ -1,0 +1,56 @@
+version: '3.3'
+
+services:
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: makeupShop
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d/
+
+  userserver:
+    image: anamaria2k/idp_proiect:userserver
+    restart: always
+    depends_on:
+       - db
+    ports:
+      - '5000:5000'
+
+  userclient:
+    image: anamaria2k/idp_proiect:userclient
+    restart: always
+    links:
+       - userserver
+    ports:
+      - '4000:4000'
+
+  adminserver:
+    image: anamaria2k/idp_proiect:adminserver
+    restart: always
+    depends_on:
+       - db
+    ports:
+      - '3000:3000'
+
+
+  adminclient:
+    image: anamaria2k/idp_proiect:adminclient
+    restart: always
+    links:
+       - adminserver
+    ports:
+      - '2000:2000'
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
+      
