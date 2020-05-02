@@ -47,8 +47,6 @@ services:
        - adminserver
     ports:
       - '2000:2000'
-    volumes:
-      - ./adminclient/src:/src
 
   adminer:
     image: adminer
