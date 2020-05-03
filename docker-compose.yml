@@ -3,7 +3,7 @@ version: '3.3'
 services:
 
   db:
-    image: mysql:5.7
+    image: anamaria2k/idp_proiect:database
     restart: always
     environment:
       MYSQL_USER: user
@@ -12,8 +12,6 @@ services:
       MYSQL_DATABASE: makeupShop
     ports:
       - '3306:3306'
-    volumes:
-      - ./database:/docker-entrypoint-initdb.d/
 
   userserver:
     image: anamaria2k/idp_proiect:userserver
@@ -53,4 +51,3 @@ services:
     restart: always
     ports:
       - '8080:8080'
-      
