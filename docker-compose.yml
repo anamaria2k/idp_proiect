@@ -35,8 +35,7 @@ services:
     depends_on:
        - db
     ports:
-      - '3000:3000'
-
+      - '1000:1000'
 
   adminclient:
     image: anamaria2k/idp_proiect:adminclient
@@ -53,7 +52,7 @@ services:
       - '8080:8080'
 
   prometheus:
-    image: prom/prometheus:v2.2.1
+    image: anamaria2k/idp_proiect:prometheus
     ports:
       - 9090:9090
 
@@ -68,8 +67,3 @@ services:
       - 3000:3000
     depends_on:
       - prometheus
-
-  
-# Names our volume
-volumes:
-  my-db:
