@@ -6,13 +6,16 @@ from flask import request, Response
 import time
 import json
 from mysql.connector import errorcode
+from prometheus_flask_exporter import PrometheusMetrics
 
-app = Flask(__name__)
+userserver = Flask(__name__)
+PrometheusMetrics(app)
 
 mydb = mysql.connector.connect(user="user", password="password",
 										host="db",
 										port="3306",
 										database="makeupShop")
+
 
 login_user_id = 0
 cookie_session_id = 0
@@ -277,14 +280,14 @@ def finish_order(user_id, session_id):
 	return "Successfully inserted in table"
 
 
-@app.route("/get_name_categ", methods=["GET"])
+@userserver.route("/get_name_categ", methods=["GET"])
 def home_page():
 	categories = get_categories()
 	full_name = get_full_name()
 	payload = {'full_name': full_name, 'categories':categories}
 	return payload
 
-@app.route("/products", methods=["GET","POST"])
+@userserver.route("/products", methods=["GET","POST"])
 def products_page():
 	global cookie_session_id
 	payload = request.get_json()
@@ -298,7 +301,7 @@ def products_page():
 	return res
 
 
-@app.route("/register", methods=["GET", "POST"])
+@userserver.route("/register", methods=["GET", "POST"])
 def register_page_post():
 	categories = get_categories()
 	response = {'categories': categories, 'message': "", 'email': ""}
@@ -319,7 +322,7 @@ def register_page_post():
 
 	return response
 
-@app.route("/login", methods=["GET","POST"])
+@userserver.route("/login", methods=["GET","POST"])
 def login_page_post():
 	global login_user_id
 	payload = request.get_json()
@@ -338,7 +341,7 @@ def login_page_post():
 
 	return resp
 
-@app.route("/logout", methods=["GET"])
+@userserver.route("/logout", methods=["GET"])
 def logout_page():
 	global login_user_id
 	global cookie_session_id
@@ -348,7 +351,7 @@ def logout_page():
 	
 	return resp
 
-@app.route("/cart", methods=["GET", "POST"])
+@userserver.route("/cart", methods=["GET", "POST"])
 def cart_page_get():
 	global cookie_session_id
 	session_id = cookie_session_id
@@ -365,7 +368,7 @@ def cart_page_get():
 
 	return res
 	
-@app.route("/currentCart", methods=["GET","POST"])
+@userserver.route("/currentCart", methods=["GET","POST"])
 def add_products():
 	global cookie_session_id
 	session_id = cookie_session_id
@@ -389,7 +392,7 @@ def add_products():
 
 	return resp
 
-@app.route("/endCart", methods=["GET","POST"])
+@userserver.route("/endCart", methods=["GET","POST"])
 def cart_finish():
 	global login_user_id
 	global cookie_session_id
@@ -403,4 +406,4 @@ def cart_finish():
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0',port='5000',debug=True)
+	userserver.run(host='0.0.0.0',port='5000')

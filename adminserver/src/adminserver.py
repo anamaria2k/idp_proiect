@@ -7,7 +7,7 @@ import time
 import json
 from mysql.connector import errorcode
 
-app = Flask(__name__)
+adminserver = Flask(__name__)
 
 mydb = mysql.connector.connect(user="user", password="password",
 										host="db",
@@ -220,74 +220,74 @@ def get_all_orders():
 
 	return orders
 
-@app.route("/get_categ", methods=["GET","POST"])
+@adminserver.route("/get_categ", methods=["GET","POST"])
 def get_categ():
 	categories = get_categories()
 	payload = {'categories':categories}
 	return payload
 
-@app.route("/add_categ", methods=["GET","POST"])
+@adminserver.route("/add_categ", methods=["GET","POST"])
 def add_categ():
 	payload = request.get_json()
 	add_category(payload['categ_name'])
 	return payload
 
-@app.route("/get_categ_by_id", methods=["GET","POST"])
+@adminserver.route("/get_categ_by_id", methods=["GET","POST"])
 def get_categ_by_id():
 	payload = request.get_json()
 	categ = get_category_by_id(int(payload['categ_id']))
 	resp = {'categ':categ}
 	return resp
 
-@app.route("/update_categ", methods=["GET","POST"])
+@adminserver.route("/update_categ", methods=["GET","POST"])
 def update_categ():
 	payload = request.get_json()
 	categ = update_category(int(payload['id']), payload['categ_name'])
 	return payload
 
-@app.route("/delete_categ", methods=["GET","POST"])
+@adminserver.route("/delete_categ", methods=["GET","POST"])
 def delete_categ():
 	payload = request.get_json()
 	delete_category(payload['categ_id'])
 	return payload
 
-@app.route("/get_products", methods=["GET","POST"])
+@adminserver.route("/get_products", methods=["GET","POST"])
 def get_products():
 	products = get_prods()
 	payload = {'products':products}
 	return payload
 
-@app.route("/add_product", methods=["GET","POST"])
+@adminserver.route("/add_product", methods=["GET","POST"])
 def add_product():
 	payload = request.get_json()
 	add_prod(payload['categ_id'], payload['prod_name'], payload['brand'], payload['descr'], payload['pict'], payload['price'], payload['stock'])
 	return payload
 
-@app.route("/get_products_by_id", methods=["GET","POST"])
+@adminserver.route("/get_products_by_id", methods=["GET","POST"])
 def get_products_by_id():
 	payload = request.get_json()
 	prod = get_prods_by_id(int(payload['prod_id']))
 	resp = {'prod':prod}
 	return resp
 
-@app.route("/update_product", methods=["GET","POST"])
+@adminserver.route("/update_product", methods=["GET","POST"])
 def update_product():
 	payload = request.get_json()
 
 	prod = update_prod(int(payload['prod_id']), payload['categ_id'], payload['prod_name'], payload['brand'], payload['descr'], payload['pict'], payload['price'], payload['stock'])
 	return payload
 
-@app.route("/delete_product", methods=["GET","POST"])
+@adminserver.route("/delete_product", methods=["GET","POST"])
 def delete_product():
 	payload = request.get_json()
 	delete_prod(payload['prod_id'])
 	return payload
 
-@app.route("/get_orders", methods=["GET","POST"])
+@adminserver.route("/get_orders", methods=["GET","POST"])
 def get_orders():
 	orders = get_all_orders()
 	payload = {'orders':orders}
 	return payload
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0',port='3000',debug=True)
+	adminserver.run(host='0.0.0.0',port='1000',debug=True)
