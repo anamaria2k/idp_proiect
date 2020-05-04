@@ -9,7 +9,7 @@ from mysql.connector import errorcode
 from prometheus_flask_exporter import PrometheusMetrics
 
 userserver = Flask(__name__)
-PrometheusMetrics(app)
+PrometheusMetrics(userserver)
 
 mydb = mysql.connector.connect(user="user", password="password",
 										host="db",
